@@ -1,10 +1,8 @@
 //Sarah Botwinick
 //parser.cc
-//Prog5 - creates a parser    
+//creates a parser    
 #include "parser.h"
 #include <cstring>
-//#include <array>
-//#include "stack.cc"
 
 Parser::Parser(Lexer& lexerx, ostream& outx): lexer(lexerx), out(outx), lindex(1), tindex(1) {
   token = lexer.nextToken();
@@ -26,28 +24,7 @@ void Parser::check(int tokenType, string message) {
 void emit(string text){
   cout << text << endl;
 }
-
-/*void postOrder(treeNode node){
-  if(node != null){
-    postOrder(node->left);
-    postOrder(node->right);
-    geninst(node);
-    //not sure about this
-  }
-}
-*/
-/*bool checkVars(string varName, string vars[]){
-  int i =0;
-  for(i, i < vars.size(), i++){
-    if( vars[i] == varName){
-      return true;
-    }
-  }
-  return false;
-}
-*/
-					    
-
+					   
 
 
 string currentFunc;
@@ -267,20 +244,6 @@ void Parser::geninst(TreeNode *node){
     }
   }
 }
-/*  void instruction(string inst){
-    emit("     pop rbx");
-    emit("     pop rax");
-    emit("     cmp rax,rbx");
-    string instFinal = "      " + inst + " j1";
-    emit(instFinal);
-    emit("     mov rax,0");
-    emit("     jmp j2");
-    emit("  j1:");
-    emit("     mov rax,1");
-    emit("  j2:");
-    emit("     push rax");
-  }
-*/
 
 string varNamesArray[100];
 int counter = 0;
@@ -296,9 +259,6 @@ void Parser::vardefs(TreeNode *node){
     }
   }
   }
-  //varNameStack.push(varName);
-  //figure out how to add these variables to a data structure
-  //where do I declare the data structure
   return;
 }
 
@@ -317,11 +277,8 @@ void Parser::genasm(TreeNode *node){
   cout << "  global main" << endl;
   cout << "  extern printf" << endl;
   cout << "  segment .bss" << endl;
-  //int counter = 0;
-  //string[] varNamesArray = new string[100];
   vardefs(node);
-  //i know it's not working right, but gonna code it as if it is
-
+	
   int variableName = 0;
   while(variableName< counter){
     string varName = varNamesArray[variableName];
@@ -336,27 +293,19 @@ void Parser::genasm(TreeNode *node){
   for(int i = 0; i < nfmts; i++){
     emit("     fmt" + itos(i+1) + ": db " + fmts[i] + ", 0");
   }
-  
-  //cout << "  section .text" << endl;
-  //Stack varNameStack;
-
-  //geninst(node);
+ 
  }
 
-//confused about this
 Parser::TreeNode* Parser::factor() {
   TreeNode* factorNode;
   int type = token.type();
   if(type == Token::LPAREN){
     token =  lexer.nextToken();
     factorNode = expression();
-    // TreeNode* expressionNode;
     check(Token::RPAREN, "need a right parenthesis");
-    //      token =lexer.nextToken();
     
   }
   else if(type == Token::INTLIT){
-    //    Operation op = PUSHL;
     factorNode = new TreeNode(PUSHL, token.lexeme());
     token = lexer.nextToken();
   }
@@ -372,18 +321,12 @@ Parser::TreeNode* Parser::factor() {
 	error("this variable has not been declared");
       }
     factorNode = new TreeNode(PUSHV, x);
-    // token = lexer.nextToken();
     }
    
         }
-  // else{
-      // error("error in factor function");//not sure what to add as op
-      //    }
   return factorNode;
 }
-//is this done correctly? tree made well?
-//funcall was not given in h file, but I added it. is that correct?
-//check this, did in class
+
 Parser::TreeNode* Parser::funcall(string functionName){
   check(Token::LPAREN, "error in funcall");
    token = lexer.nextToken();
@@ -391,33 +334,22 @@ Parser::TreeNode* Parser::funcall(string functionName){
   TreeNode* funcallNode;
   if(tokenType != Token::RPAREN){
     TreeNode* right = new TreeNode(CALL, functionName);
-    // tokenType = token.type();
     funcallNode = expression();
-    //funcallNode = new TreeNode(SEQ, expression(), right);
-    //    token = lexer.nextToken();
+   
           tokenType = token.type();
-	  //	   check(Token::COMMA, "error comma");
 	    while(tokenType == Token::COMMA){
 	        token = lexer.nextToken();
 	      TreeNode* right2 = expression();
-      funcallNode = new TreeNode(SEQ, funcallNode, right2);//i dont
-							  //think this
-							  //is right
+      funcallNode = new TreeNode(SEQ, funcallNode, right2);
                   token = lexer.nextToken();
       tokenType = token.type();
-      // check(Token::RPAREN, "infinite loop");
 	    }
     funcallNode = new TreeNode(SEQ, funcallNode, right);
-    //    token = lexer.nextToken();
-    //    check(Token::RPAREN, "need a right parenthesis - b");
     
-    //token = lexer.nextToken();
   }
   else{
   check(Token::RPAREN, "need a right parenthesis - a");
-  //unsure what to put here
-  funcallNode = new TreeNode(CALL, functionName);//figure out how to add the name of
-				  //the method
+  funcallNode = new TreeNode(CALL, functionName);
   token = lexer.nextToken();
   }
   return funcallNode;
@@ -441,9 +373,7 @@ Parser::TreeNode* Parser::term() {
 	}
     termNode = new TreeNode(op, termNode, factorNode);
     tokenType = token.type();
-    // token = lexer.nextToken();
   }
-  //    token = lexer.nextToken();//
   return termNode;
     
 }
@@ -467,7 +397,6 @@ Parser::TreeNode* Parser::expression() {
     expressionNode = new TreeNode(op, expressionNode, termNode);
     tokenType = token.type();
   }
-  //   token = lexer.nextToken();
   return expressionNode;
 }
 
@@ -505,25 +434,7 @@ Parser::TreeNode* Parser::relationalExpression() {
 }
 
 Parser::TreeNode* Parser::logicalExpression() {
-  /* TreeNode* logicalExpressionNode = relationalExpression();
-  while(token.type() == Token::AND || token.type() == Token::OR){
-    Operation op;
-    int tokenType = token.type();
-    switch (tokenType){
-    case Token::AND:
-	op = AND;
-	break;
-    case Token::OR:
-      op = OR;
-      break;
-	
-      }
-    token = lexer.nextToken();
-    TreeNode* rightNode = expression();
-    logicalExpressionNode = new TreeNode(op, logicalExpressionNode, rightNode);
-  }
-  return logicalExpressionNode;
-  */
+  
   TreeNode* logicalExpressionNode = relationalExpression();
   TreeNode* relationalExpressionNode;;
   int tokenType = token.type();
@@ -564,20 +475,13 @@ Parser::TreeNode* Parser::returnStatement() {
    check(Token::RETURN, "error");
      Operation op = RET;
      token = lexer.nextToken();
-     //string x = st.getUniqueSymbol(token.lexeme());
-     //TreeNode* right = new TreeNode(op, x);
-     //     token = lexer.nextToken();
+     
   TreeNode* returnStatementNode = logicalExpression();
-  //  TreeNode* right = new TreeNode(op, token.lexeme());
-  returnStatementNode = new TreeNode(SEQ, returnStatementNode, new TreeNode(op)); //unsure
-								     //about
-								     //this
-  //  token = lexer.nextToken();
+  returnStatementNode = new TreeNode(SEQ, returnStatementNode, new TreeNode(op)); 
   check(Token::SEMICOLON, "need a semicolon");
   token = lexer.nextToken();
   return returnStatementNode;
 }
-//not on grammar sheet
 Parser::TreeNode* Parser::printfStatement() {
   TreeNode* paramList = NULL;
   int nparams = 0;
@@ -628,12 +532,9 @@ Parser::TreeNode* Parser::whileStatement() {
   st.enterScope();
   right = block();
   st.exitScope();
-  // TreeNode* left = new TreeNode(PUSHL, L1);//
-  //  whileStatementNode = new TreeNode(SEQ, left, right);//
+  
   whileStatementNode = new TreeNode(SEQ,left,right);
-  // left = whileStatementNode;
-  //right = new TreeNode(JUMPF, L1);
-  //whileStatementNode = new TreeNode(SEQ,whileStatementNode, right);
+  
   left = whileStatementNode;
   right = new TreeNode(JUMP, L1);
   whileStatementNode = new TreeNode(SEQ, left, right);
@@ -641,23 +542,11 @@ Parser::TreeNode* Parser::whileStatement() {
   right = new TreeNode(LABEL, L2 + ":");
   whileStatementNode = new TreeNode(SEQ, left, right);
 
-  //string L2 = makeLabel();
-  // TreeNode* left = new TreeNode(LABEL, L1);
-  // TreeNode* whileStatementNode = new TreeNode(SEQ, left, right);
-  //TreeNode* parent = new TreeNode(
-  //need a jumpf statement, but not sure how to do it
-  //do i need to increment token?
+ 
   return whileStatementNode;
-
-
-
-
-
-
 
 }
 
-//not too confident about this function
 Parser::TreeNode* Parser::ifStatement() {
    check(Token::IF, "error - if");
   token = lexer.nextToken();
@@ -667,16 +556,13 @@ Parser::TreeNode* Parser::ifStatement() {
   check(Token::RPAREN, "missing a right parenthesis - if");
   token = lexer.nextToken();
   string L1 = makeLabel();
-  //do I need to go to next token here?
   TreeNode* right = new TreeNode(JUMPF, L1);
   TreeNode* ifStatementNode = new TreeNode(SEQ, left, right);
-  // check(Token::LPAREN, "missing a left parenthesis");
   left = ifStatementNode;
   st.enterScope();
   right = block();
   st.exitScope();
   ifStatementNode = new TreeNode(SEQ,left,right);
-  //  token = lexer.nextToken();
   int tokenType = token.type();
   if(tokenType == Token::ELSE){
     token = lexer.nextToken();  
@@ -688,7 +574,6 @@ Parser::TreeNode* Parser::ifStatement() {
     right = new TreeNode(LABEL, L1);
     ifStatementNode = new TreeNode(SEQ, left, right);
     left = ifStatementNode;
-    //token = lexer.nextToken();//not sure if its here
     st.enterScope();
     right = block();
     st.exitScope();
@@ -696,20 +581,15 @@ Parser::TreeNode* Parser::ifStatement() {
     left = ifStatementNode;
     right = new TreeNode(LABEL,L2 +":");
     ifStatementNode = new TreeNode(SEQ, left, right);
-    //do i need to increment token?
   }
   else{
     left = ifStatementNode;
     right = new TreeNode(LABEL, L1+":");
     ifStatementNode = new TreeNode(SEQ, left, right);
-    //need a jumpf statement, but not sure how to do it
-    //do i need to increment token?
   }
   return ifStatementNode;
   
 }
-//same as assignment expression, since assignment expression isnt in
-//the grammar sheet
 Parser::TreeNode* Parser::assignStatement() {
   check(Token::IDENT, "error - assign3");
   string s = token.lexeme();
@@ -718,16 +598,10 @@ Parser::TreeNode* Parser::assignStatement() {
     error("this variable hasn't been declared");
   }
   token = lexer.nextToken();
-  // string s = token.lexeme();
   check(Token::ASSIGN, "error - assign4");
    token = lexer.nextToken();
-   //string s = token.lexeme();
-  // token = lexer.nextToken();
-  // token = lexer.nextToken();
      TreeNode* Node1 = new TreeNode(STORE, x);
    TreeNode* Node2 = expression();
-   // TreeNode* assignStatementNode = new TreeNode(SEQ, Node1, Node2);
-   //  TreeNode* Node3 = new TreeNode(STORE, s);
   TreeNode* assignStatementNode = new TreeNode(SEQ, Node2, Node1);
   token = lexer.nextToken();//
   return assignStatementNode;
@@ -750,15 +624,11 @@ Parser::TreeNode* Parser::vardefStatement() {
   }
   check(Token::SEMICOLON, "missing semicolon");
   token = lexer.nextToken();
-  //cout<<token.lexeme()<<endl;  
-  //cout<<token.type()<<endl;
   return new TreeNode(SEQ);
 }
 
 Parser::TreeNode* Parser::statement() {
   int type = token.type();
-  //cout<<type<<endl;
-  //cout<<token.lexeme()<<endl;
   TreeNode* statementNode;
     if(type == Token::VAR){
       statementNode = vardefStatement();
@@ -773,22 +643,18 @@ Parser::TreeNode* Parser::statement() {
     return statementNode;
   }
   else if(type == Token::IDENT){
-    //cout<<token.lexeme()<<endl;    
     statementNode = assignStatement();
-    //    cout<<token.lexeme()<<endl;
     return statementNode;
   }
   else if (type == Token::RETURN){
     statementNode = returnStatement();
     return statementNode;
   }
-  //add printf, but not sure if i'm supposed to do this
   else if(type == Token::PRINTF){
     statementNode = printfStatement();
     return statementNode;
   }
   else{
-    //    cout<<type<<endl;
     error("error in statement function");
   }
   return 0;
@@ -796,7 +662,6 @@ Parser::TreeNode* Parser::statement() {
 
 Parser::TreeNode* Parser::block() {
   check(Token::LBRACE, "missing a left brace");
-  //st.enterScope();
    token = lexer.nextToken();
     int type = token.type();
     if(type == Token::RBRACE){
@@ -809,11 +674,8 @@ Parser::TreeNode* Parser::block() {
       TreeNode* right;
       right = statement();
       blockNode = new TreeNode(SEQ, blockNode, right);
-      // type = token.type();
-      // token = lexer.nextToken();//not sure about this
             type = token.type();
     }
-    //st.exitScope();
     token = lexer.nextToken();
     return blockNode;
   
@@ -822,20 +684,7 @@ Parser::TreeNode* Parser::block() {
 Parser::TreeNode* Parser::parameterdef() {
   return 0;
 }
-/*
-Parser::TreeNode* Parser::parameterdefs() {
-  TreeNode* parameterdefsNode;
-  if(token.type() == Token::IDENT){
-    paramaterdefsNode = paramaterDef();
-   
-    token = lexer.nextToken();
-    while(token.type() == Token::COMMA){
-      parameterdefsNode = new TreeNode(SEQ, paramaterdefsNode, parameterDef());
-    }
-  }
-  return parameterdefsNode;
-}
-*/
+
 Parser::TreeNode* Parser::function() {
   check(Token::FUNCTION, "need a function name");
   token = lexer.nextToken();
@@ -867,33 +716,7 @@ Parser::TreeNode* Parser::function() {
     token = lexer.nextToken();
     
     }
-  /*  Operation op = PARAM1;
-  TreeNode* functionNode = new TreeNode(FUNC, funcName + ':');
-  while(token.type() != Token::RPAREN){
-    if(token.type() == Token::COMMA){
-      token = lexer.nextToken();
-    }
-    functionNode = new TreeNode(SEQ, functionNode, new TreeNode(op, token.lexeme()));
-    st.addSymbol(token.lexeme());
-    switch(op) {
-    case PARAM1:
-      //      st.addSymbol(token.lexeme());
-      op = PARAM2;
-      break;
-    case PARAM2:
-      op = PARAM3;
-      break;
-    case PARAM3:
-      op = PARAM4;
-      break;
-    case PARAM4:
-      op = PARAM5;
-      break;
-    
-    default:
-      error("Too Many Params!");
-    }
-  */
+
   TreeNode* functionNode = new TreeNode(FUNC, funcName);
   while(counter >=0){
     st.addSymbol(params[counter]);
@@ -906,7 +729,6 @@ Parser::TreeNode* Parser::function() {
   functionNode = new TreeNode(SEQ, functionNode, block());
   st.exitScope();
   return functionNode;
-  //call block but not sure how to do it to make tree correct
 
 }
 
