@@ -1,0 +1,5 @@
+make
+microc < testcu.mc > testprog.asm
+comp testprog
+testprog
+make clean
